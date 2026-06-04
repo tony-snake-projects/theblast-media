@@ -508,12 +508,26 @@
         </div>
       </div>
       <div>
-        <form id="ctForm" action="https://formspree.io/f/mjgdkkdq" method="POST" onsubmit="subForm(event)">
-          <div class="form-group"><label class="form-label" data-i18n="fm.name">Your Name *</label><input class="form-input" type="text" required data-i18n-ph="fm.name.ph" placeholder="Your name"/></div>
-          <div class="form-group"><label class="form-label" data-i18n="fm.email">Email *</label><input class="form-input" type="email" required placeholder="you@company.com"/></div>
+        <div data-fs-success class="form-success" id="ct-success">
+          <h3 data-i18n="fm.ok.h">Message received.</h3>
+          <p data-i18n="fm.ok.p">John will read this personally and reply within 24 hours.<br/>The factory is already thinking about your project.</p>
+        </div>
+        <div data-fs-error style="display:none;color:var(--red);font-size:13px;margin-bottom:16px;padding:12px;border:1px solid var(--red);"></div>
+
+        <form id="ctForm">
+          <div class="form-group">
+            <label class="form-label" data-i18n="fm.name">Your Name *</label>
+            <input class="form-input" type="text" name="name" required data-fs-field data-i18n-ph="fm.name.ph" placeholder="Your name"/>
+            <span data-fs-error="name" style="color:var(--red);font-size:11px;margin-top:4px;display:block"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="fm.email">Email *</label>
+            <input class="form-input" type="email" name="email" required data-fs-field placeholder="you@company.com"/>
+            <span data-fs-error="email" style="color:var(--red);font-size:11px;margin-top:4px;display:block"></span>
+          </div>
           <div class="form-group">
             <label class="form-label" data-i18n="fm.type">Project Type</label>
-            <select class="form-select">
+            <select class="form-select" name="project_type" data-fs-field>
               <option value="" data-i18n="fm.type.def">What are you building?</option>
               <option data-i18n="fm.type.app">Web App / Platform</option>
               <option data-i18n="fm.type.ai">AI System / Agent</option>
@@ -523,14 +537,20 @@
               <option data-i18n="fm.type.other">Something Else</option>
             </select>
           </div>
-          <div class="form-group"><label class="form-label" data-i18n="fm.idea">Tell us about it *</label><textarea class="form-textarea" required data-i18n-ph="fm.idea.ph" placeholder="What's the idea? What problem does it solve? What's your timeline?"></textarea></div>
-          <button type="submit" class="form-submit" data-i18n="fm.submit">Send to the Factory →</button>
+          <div class="form-group">
+            <label class="form-label" data-i18n="fm.idea">Tell us about it *</label>
+            <textarea class="form-textarea" name="message" required data-fs-field data-i18n-ph="fm.idea.ph" placeholder="What's the idea? What problem does it solve? What's your timeline?"></textarea>
+            <span data-fs-error="message" style="color:var(--red);font-size:11px;margin-top:4px;display:block"></span>
+          </div>
+          <button type="submit" class="form-submit" data-fs-submit-btn data-i18n="fm.submit">Send to the Factory →</button>
           <p class="form-note" data-i18n="fm.note">Every message is read personally by John, Founder of BLAST.</p>
         </form>
-        <div class="form-success" id="ct-success">
-          <h3 data-i18n="fm.ok.h">Message received.</h3>
-          <p data-i18n="fm.ok.p">John will read this personally and reply within 24 hours.<br/>The factory is already thinking about your project.</p>
-        </div>
+
+        <script>
+          window.formspree = window.formspree || function(){(formspree.q=formspree.q||[]).push(arguments)};
+          formspree('initForm',{formElement:'#ctForm',formId:'mjgdkkdq'});
+        </script>
+        <script src="https://unpkg.com/@formspree/ajax@1" defer></script>
       </div>
     </div>
   </div>
@@ -874,27 +894,6 @@ function sr(){
       <div class="res-opp-body">${o.b}</div>
       <div class="res-opp-roi">${o.r}</div>
     </div>`).join('');
-}
-
-// Form
-function subForm(e){
-  e.preventDefault();
-  const form = document.getElementById('ctForm');
-  const data = new FormData(form);
-  fetch('https://formspree.io/f/mjgdkkdq', {
-    method: 'POST',
-    body: data,
-    headers: { 'Accept': 'application/json' }
-  }).then(r => {
-    if(r.ok){
-      form.style.display='none';
-      document.getElementById('ct-success').style.display='block';
-    } else {
-      alert('Something went wrong. Please email directly: tony42snake@gmail.com');
-    }
-  }).catch(() => {
-    alert('Something went wrong. Please email directly: tony42snake@gmail.com');
-  });
 }
 
 // Smooth scroll
