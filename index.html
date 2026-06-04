@@ -508,7 +508,7 @@
         </div>
       </div>
       <div>
-        <form id="ctForm" onsubmit="subForm(event)">
+        <form id="ctForm" action="https://formspree.io/f/mjgdkkdq" method="POST" onsubmit="subForm(event)">
           <div class="form-group"><label class="form-label" data-i18n="fm.name">Your Name *</label><input class="form-input" type="text" required data-i18n-ph="fm.name.ph" placeholder="Your name"/></div>
           <div class="form-group"><label class="form-label" data-i18n="fm.email">Email *</label><input class="form-input" type="email" required placeholder="you@company.com"/></div>
           <div class="form-group">
@@ -879,8 +879,22 @@ function sr(){
 // Form
 function subForm(e){
   e.preventDefault();
-  document.getElementById('ctForm').style.display='none';
-  document.getElementById('ct-success').style.display='block';
+  const form = document.getElementById('ctForm');
+  const data = new FormData(form);
+  fetch('https://formspree.io/f/mjgdkkdq', {
+    method: 'POST',
+    body: data,
+    headers: { 'Accept': 'application/json' }
+  }).then(r => {
+    if(r.ok){
+      form.style.display='none';
+      document.getElementById('ct-success').style.display='block';
+    } else {
+      alert('Something went wrong. Please email directly: tony42snake@gmail.com');
+    }
+  }).catch(() => {
+    alert('Something went wrong. Please email directly: tony42snake@gmail.com');
+  });
 }
 
 // Smooth scroll
