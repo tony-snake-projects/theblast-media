@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BLAST — The Creative AI Factory</title>
+  <style>
+    :root {
+      --black:#000; --near:#080808; --dark:#0f0f0f; --dark2:#161616;
+      --border:#1e1e1e; --border2:#2a2a2a; --muted:#444; --mid:#777;
+      --light:#bbb; --white:#f0f0f0; --pure:#fff;
+      --accent:#e8c547; --adim:rgba(232,197,71,0.12); --aborder:rgba(232,197,71,0.25);
+      --red:#e63946;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--black);color:var(--white);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none}
+    ::selection{background:var(--accent);color:var(--black)}
+    ::-webkit-scrollbar{width:3px}
+    ::-webkit-scrollbar-thumb{background:var(--border2)}
+
+    /* NAV */
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:22px 48px;transition:background .3s,border-color .3s;border-bottom:1px solid transparent}
+    nav.scrolled{background:rgba(0,0,0,.94);backdrop-filter:blur(16px);border-color:var(--border)}
+    .nav-logo{font-size:20px;font-weight:900;letter-spacing:.2em;color:var(--pure);text-transform:uppercase}
+    .nav-logo span{color:var(--accent)}
+    .nav-right{display:flex;align-items:center;gap:28px}
+    .lang-toggle{display:flex;align-items:center;gap:8px}
+    .lang-btn{background:none;border:none;color:var(--muted);font-size:11px;letter-spacing:.12em;font-weight:700;cursor:pointer;padding:4px 2px;transition:color .2s;text-transform:uppercase;font-family:inherit}
+    .lang-btn.active{color:var(--accent)}
+    .lang-sep{color:var(--border2);font-size:12px}
+    .nav-cta{padding:10px 24px;border:1px solid var(--aborder);border-radius:2px;font-size:11px;letter-spacing:.14em;font-weight:700;text-transform:uppercase;color:var(--accent);transition:all .2s}
+    .nav-cta:hover{background:var(--accent);color:var(--black)}
+
+    /* LAYOUT */
+    section{padding:130px 48px}
+    .container{max-width:1140px;margin:0 auto}
+    .label{display:inline-block;font-size:10px;letter-spacing:.22em;font-weight:700;text-transform:uppercase;color:var(--accent);margin-bottom:28px}
+    .label::before{content:'—— ';opacity:.4}
+
+    /* HERO */
+    #hero{min-height:100vh;display:flex;align-items:center;padding:180px 48px 120px;position:relative;overflow:hidden}
+    .hero-noise{position:absolute;inset:0;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px}
+    .hero-line{position:absolute;top:0;left:50%;width:1px;height:100%;background:linear-gradient(to bottom,transparent,rgba(232,197,71,.08),transparent);pointer-events:none}
+    .hero-content{position:relative;z-index:1;max-width:960px}
+    .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;padding:7px 16px;border:1px solid var(--border2);border-radius:100px;font-size:11px;letter-spacing:.14em;color:var(--mid);text-transform:uppercase;margin-bottom:48px}
+    .hero-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:blink 2s infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+    .hero-h1{font-size:clamp(48px,7.5vw,110px);font-weight:900;line-height:.95;letter-spacing:-.04em;color:var(--pure);margin-bottom:40px}
+    .hero-h1 em{font-style:normal;color:var(--accent);display:block}
+    .hero-sub{font-size:clamp(17px,2.2vw,22px);color:var(--mid);line-height:1.7;max-width:560px;margin-bottom:64px}
+    .hero-sub strong{color:var(--light);font-weight:500}
+    .hero-actions{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+    .btn-primary{padding:17px 40px;background:var(--accent);color:var(--black);font-size:12px;letter-spacing:.12em;font-weight:800;text-transform:uppercase;border-radius:2px;transition:all .2s;border:none;cursor:pointer;display:inline-block}
+    .btn-primary:hover{background:var(--pure);transform:translateY(-2px)}
+    .btn-ghost{padding:17px 40px;border:1px solid var(--border2);color:var(--light);font-size:12px;letter-spacing:.12em;font-weight:600;text-transform:uppercase;border-radius:2px;transition:all .2s;display:inline-block;background:none;cursor:pointer}
+    .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+    .hero-ticker{margin-top:100px;padding-top:48px;border-top:1px solid var(--border);display:flex;gap:56px;flex-wrap:wrap}
+    .ticker-item{}
+    .ticker-num{font-size:42px;font-weight:900;color:var(--pure);letter-spacing:-.03em;line-height:1}
+    .ticker-num span{color:var(--accent)}
+    .ticker-label{font-size:11px;color:var(--muted);letter-spacing:.08em;margin-top:6px;text-transform:uppercase}
+
+    /* MANIFESTO */
+    #manifesto{background:var(--near);border-top:1px solid var(--border)}
+    .manifesto-grid{display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:center}
+    .manifesto-left{}
+    .manifesto-h2{font-size:clamp(32px,4.5vw,60px);font-weight:900;line-height:1.0;letter-spacing:-.03em;color:var(--pure);margin-bottom:32px}
+    .manifesto-h2 em{font-style:normal;color:var(--accent)}
+    .manifesto-body{font-size:17px;color:var(--mid);line-height:1.9}
+    .manifesto-body p{margin-bottom:20px}
+    .manifesto-body strong{color:var(--light);font-weight:500}
+    .manifesto-right{}
+    .warhol-quote{padding:40px;border:1px solid var(--border2);background:var(--dark);position:relative}
+    .warhol-quote::before{content:'"';position:absolute;top:-20px;left:32px;font-size:80px;color:var(--accent);font-weight:900;line-height:1}
+    .warhol-quote-text{font-size:20px;font-weight:700;color:var(--pure);line-height:1.5;margin-bottom:20px}
+    .warhol-quote-attr{font-size:11px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+    .warhol-quote-attr span{color:var(--accent)}
+    .manifesto-cards{display:grid;grid-template-columns:1fr;gap:1px;background:var(--border);border:1px solid var(--border);margin-top:48px}
+    .manifesto-card{background:var(--dark);padding:28px 32px;display:flex;align-items:flex-start;gap:20px}
+    .m-card-num{font-size:11px;letter-spacing:.15em;color:var(--accent);font-weight:700;flex-shrink:0;padding-top:3px}
+    .m-card-content h3{font-size:16px;font-weight:700;color:var(--pure);margin-bottom:6px}
+    .m-card-content p{font-size:13px;color:var(--muted);line-height:1.6}
+
+    /* FACTORY FLOOR */
+    #factory{border-top:1px solid var(--border)}
+    .factory-header{margin-bottom:80px}
+    .factory-h2{font-size:clamp(28px,4vw,54px);font-weight:900;line-height:1.05;letter-spacing:-.03em;color:var(--pure);margin-bottom:20px}
+    .factory-sub{font-size:17px;color:var(--mid);max-width:560px;line-height:1.7}
+    .factory-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border)}
+    .factory-item{background:var(--dark);padding:32px 28px;transition:background .2s;position:relative;overflow:hidden;cursor:pointer}
+    .factory-item:hover{background:var(--dark2)}
+    .factory-item::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),transparent);opacity:0;transition:opacity .2s}
+    .factory-item:hover::after{opacity:1}
+    .fi-status{display:inline-flex;align-items:center;gap:6px;font-size:10px;letter-spacing:.12em;font-weight:700;text-transform:uppercase;margin-bottom:16px}
+    .fi-status-dot{width:5px;height:5px;border-radius:50%}
+    .fi-status.live .fi-status-dot{background:#2ecc71;animation:blink 2s infinite}
+    .fi-status.live{color:#2ecc71}
+    .fi-status.built .fi-status-dot{background:var(--accent)}
+    .fi-status.built{color:var(--accent)}
+    .fi-status.internal .fi-status-dot{background:var(--mid)}
+    .fi-status.internal{color:var(--mid)}
+    .fi-name{font-size:15px;font-weight:800;color:var(--pure);letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px}
+    .fi-desc{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:16px}
+    .fi-url{font-size:11px;color:var(--accent);letter-spacing:.05em}
+    .fi-url::after{content:' ↗';opacity:.6}
+    .factory-more{margin-top:1px;background:var(--dark);border:1px solid var(--border);padding:32px;text-align:center;border-top:none}
+    .factory-more p{font-size:14px;color:var(--muted)}
+    .factory-more strong{color:var(--accent)}
+
+    /* BUILD */
+    #build{background:var(--near);border-top:1px solid var(--border)}
+    .build-header{text-align:center;margin-bottom:80px}
+    .build-h2{font-size:clamp(28px,4vw,54px);font-weight:900;line-height:1.05;letter-spacing:-.03em;color:var(--pure);margin-bottom:20px}
+    .build-sub{font-size:17px;color:var(--mid);max-width:560px;margin:0 auto;line-height:1.7}
+    .build-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border)}
+    .build-card{background:var(--dark);padding:56px 48px;position:relative}
+    .build-card.featured{background:var(--dark2);border:1px solid var(--aborder)}
+    .build-badge{position:absolute;top:-1px;left:48px;background:var(--accent);color:var(--black);font-size:9px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;padding:5px 14px}
+    .build-num{font-size:11px;letter-spacing:.2em;color:var(--accent);font-weight:700;text-transform:uppercase;margin-bottom:24px}
+    .build-name{font-size:28px;font-weight:900;color:var(--pure);letter-spacing:-.02em;margin-bottom:16px}
+    .build-tagline{font-size:16px;color:var(--mid);line-height:1.7;margin-bottom:40px}
+    .build-what{font-size:11px;letter-spacing:.15em;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:16px}
+    .build-list{list-style:none;margin-bottom:48px}
+    .build-list li{font-size:14px;color:var(--light);padding:10px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px;line-height:1.5}
+    .build-list li::before{content:'→';color:var(--accent);font-weight:700;flex-shrink:0}
+    .build-cta{padding:15px 28px;text-align:center;font-size:11px;letter-spacing:.14em;font-weight:800;text-transform:uppercase;border-radius:2px;cursor:pointer;transition:all .2s;border:none;font-family:inherit;display:block;width:100%}
+    .build-cta-primary{background:var(--accent);color:var(--black)}
+    .build-cta-primary:hover{background:var(--pure)}
+    .build-cta-ghost{background:none;border:1px solid var(--border2);color:var(--light)}
+    .build-cta-ghost:hover{border-color:var(--accent);color:var(--accent)}
+
+    /* DEMO */
+    #demo{border-top:1px solid var(--border)}
+    .demo-inner{max-width:820px;margin:0 auto}
+    .demo-header{text-align:center;margin-bottom:64px}
+    .demo-h2{font-size:clamp(24px,3.5vw,46px);font-weight:900;line-height:1.05;letter-spacing:-.03em;color:var(--pure);margin-bottom:16px}
+    .demo-sub{font-size:16px;color:var(--mid);line-height:1.7}
+    .demo-box{border:1px solid var(--border);background:var(--near);border-radius:3px;overflow:hidden}
+    .demo-bar{background:var(--dark);padding:13px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+    .demo-dot{width:10px;height:10px;border-radius:50%}
+    .demo-bar-title{font-size:10px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin:0 auto}
+    .demo-body{padding:44px}
+    .demo-step{display:none}
+    .demo-step.active{display:block;animation:fin .3s ease}
+    @keyframes fin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .demo-progress{display:flex;gap:6px;margin-bottom:40px}
+    .demo-pip{height:2px;flex:1;background:var(--border);border-radius:2px;transition:background .3s}
+    .demo-pip.done{background:var(--accent)}
+    .demo-q{font-size:22px;font-weight:800;color:var(--pure);margin-bottom:8px;line-height:1.3;letter-spacing:-.01em}
+    .demo-q-sub{font-size:13px;color:var(--muted);margin-bottom:32px}
+    .demo-opts{display:flex;flex-direction:column;gap:10px}
+    .demo-opt{padding:15px 22px;border:1px solid var(--border);border-radius:2px;background:var(--dark);font-size:14px;color:var(--light);cursor:pointer;transition:all .2s;text-align:left;font-family:inherit}
+    .demo-opt:hover,.demo-opt.sel{border-color:var(--accent);color:var(--pure);background:var(--adim)}
+    .demo-nav{display:flex;justify-content:flex-end;margin-top:32px}
+    .demo-next{padding:13px 32px;background:var(--accent);color:var(--black);font-size:11px;letter-spacing:.12em;font-weight:800;text-transform:uppercase;border:none;border-radius:2px;cursor:pointer;transition:all .2s;font-family:inherit}
+    .demo-next:hover{background:var(--pure)}
+    .demo-next:disabled{background:var(--muted);cursor:not-allowed}
+    .res-header{border-bottom:1px solid var(--border);padding-bottom:28px;margin-bottom:36px}
+    .res-header h3{font-size:24px;font-weight:800;color:var(--pure);margin-bottom:8px;letter-spacing:-.01em}
+    .res-header p{font-size:14px;color:var(--mid)}
+    .res-opp{margin-bottom:20px;padding:24px;background:var(--dark);border-left:2px solid var(--accent)}
+    .res-opp-title{font-size:15px;font-weight:800;color:var(--pure);margin-bottom:8px}
+    .res-opp-body{font-size:13px;color:var(--mid);line-height:1.7;margin-bottom:10px}
+    .res-opp-roi{font-size:10px;letter-spacing:.12em;color:var(--accent);font-weight:700;text-transform:uppercase}
+    .res-cta{text-align:center;margin-top:44px;padding:36px;border:1px solid var(--aborder);background:var(--adim)}
+    .res-cta p{font-size:16px;color:var(--light);margin-bottom:24px;line-height:1.7}
+
+    /* CONTACT */
+    #contact{background:var(--near);border-top:1px solid var(--border)}
+    .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:start}
+    .contact-left h2{font-size:clamp(28px,3.5vw,50px);font-weight:900;line-height:1.05;letter-spacing:-.03em;color:var(--pure);margin-bottom:24px}
+    .contact-left p{font-size:16px;color:var(--mid);line-height:1.8;margin-bottom:40px}
+    .contact-meta{display:flex;flex-direction:column;gap:16px}
+    .contact-meta-item{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--muted)}
+    .contact-meta-item::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+    .form-group{margin-bottom:22px}
+    .form-label{display:block;font-size:10px;letter-spacing:.16em;font-weight:700;text-transform:uppercase;color:var(--mid);margin-bottom:8px}
+    .form-input,.form-select,.form-textarea{width:100%;padding:15px 18px;background:var(--dark);border:1px solid var(--border);color:var(--white);font-size:14px;font-family:inherit;border-radius:2px;transition:border-color .2s;outline:none}
+    .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent)}
+    .form-select{cursor:pointer}
+    .form-select option{background:var(--dark)}
+    .form-textarea{resize:vertical;min-height:130px;line-height:1.6}
+    .form-submit{width:100%;padding:17px;background:var(--accent);color:var(--black);font-size:12px;letter-spacing:.14em;font-weight:800;text-transform:uppercase;border:none;border-radius:2px;cursor:pointer;transition:all .2s;margin-top:8px;font-family:inherit}
+    .form-submit:hover{background:var(--pure)}
+    .form-note{font-size:11px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.6}
+    .form-success{display:none;text-align:center;padding:48px 24px}
+    .form-success h3{font-size:24px;font-weight:800;color:var(--pure);margin-bottom:12px}
+    .form-success p{color:var(--mid)}
+
+    /* FOOTER */
+    footer{padding:56px 48px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:24px}
+    .footer-left{}
+    .footer-logo{font-size:18px;font-weight:900;letter-spacing:.2em;color:var(--pure);text-transform:uppercase}
+    .footer-logo span{color:var(--accent)}
+    .footer-tag{font-size:11px;color:var(--muted);margin-top:6px;letter-spacing:.05em}
+    .footer-copy{font-size:11px;color:var(--muted)}
+
+    /* RESPONSIVE */
+    @media(max-width:768px){
+      nav{padding:18px 24px}
+      section{padding:90px 24px}
+      #hero{padding:140px 24px 90px}
+      .manifesto-grid,.contact-grid{grid-template-columns:1fr;gap:48px}
+      .build-grid,.factory-grid{grid-template-columns:1fr}
+      footer{padding:36px 24px;flex-direction:column;text-align:center}
+    }
+  </style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="nav-logo">BL<span>A</span>ST</div>
+  <div class="nav-right">
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+      <span class="lang-sep">|</span>
+      <button class="lang-btn" id="btn-pt" onclick="setLang('pt')">PT</button>
+    </div>
+    <a href="#contact" class="nav-cta" data-i18n="nav.cta">Start a Project</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-noise"></div>
+  <div class="hero-line"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <div class="hero-dot"></div>
+      <span data-i18n="hero.tag">Nazaré, Portugal · Active</span>
+    </div>
+    <h1 class="hero-h1">
+      <span data-i18n="hero.h1a">The Creative</span><br/>
+      <em data-i18n="hero.h1b">AI Factory.</em>
+    </h1>
+    <p class="hero-sub" data-i18n="hero.sub">
+      One founder. A specialized team of AI agents.<br/>
+      <strong>We build real things.</strong> Apps, platforms, systems, brands, experiences.<br/>
+      Any idea. Any scale. Fast.
+    </p>
+    <div class="hero-actions">
+      <a href="#contact" class="btn-primary" data-i18n="hero.cta1">Start a Project</a>
+      <a href="#build" class="btn-ghost" data-i18n="hero.cta2">How We Work →</a>
+    </div>
+    <div class="hero-ticker">
+      <div class="ticker-item">
+        <div class="ticker-num">24<span>+</span></div>
+        <div class="ticker-label" data-i18n="hero.s1">Systems Built</div>
+      </div>
+      <div class="ticker-item">
+        <div class="ticker-num">48<span>h</span></div>
+        <div class="ticker-label" data-i18n="hero.s2">From Idea to Prototype</div>
+      </div>
+      <div class="ticker-item">
+        <div class="ticker-num">∞</div>
+        <div class="ticker-label" data-i18n="hero.s3">Build Capacity</div>
+      </div>
+      <div class="ticker-item">
+        <div class="ticker-num">1</div>
+        <div class="ticker-label" data-i18n="hero.s4">Human Vision</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MANIFESTO -->
+<section id="manifesto">
+  <div class="container">
+    <div class="manifesto-grid">
+      <div class="manifesto-left">
+        <span class="label" data-i18n="mf.label">The Factory</span>
+        <h2 class="manifesto-h2" data-i18n="mf.h2">Built like Warhol.<br/>Powered by <em>AI.</em></h2>
+        <div class="manifesto-body">
+          <p data-i18n="mf.p1">In the 1960s, Andy Warhol created the Factory in New York. A space where art, film, music, and culture were produced constantly, visibly, prolifically. <strong>The Factory was the brand.</strong> Not what it sold — what it made.</p>
+          <p data-i18n="mf.p2">BLAST is that. In 2026. With AI at the core. One human with a clear vision — and a factory floor of specialized AI agents that can build anything, at any scale, faster than any traditional team.</p>
+          <p data-i18n="mf.p3"><strong>Warhol had humans pretending to be machines. We have machines amplifying a human.</strong> That inversion defines this decade.</p>
+        </div>
+      </div>
+      <div class="manifesto-right">
+        <div class="warhol-quote">
+          <div class="warhol-quote-text" data-i18n="mf.quote">"Don't think about making art, just get it done. Let everyone else decide if it's good or bad, whether they love it or hate it. While they are deciding, make even more art."</div>
+          <div class="warhol-quote-attr">— Andy Warhol <span>/ BLAST, 2026</span></div>
+        </div>
+        <div class="manifesto-cards">
+          <div class="manifesto-card">
+            <div class="m-card-num">01</div>
+            <div class="m-card-content">
+              <h3 data-i18n="mf.c1.h">Not a consultancy</h3>
+              <p data-i18n="mf.c1.p">We don't write reports. We don't run discovery phases. We build things and ship them.</p>
+            </div>
+          </div>
+          <div class="manifesto-card">
+            <div class="m-card-num">02</div>
+            <div class="m-card-content">
+              <h3 data-i18n="mf.c2.h">Not an agency</h3>
+              <p data-i18n="mf.c2.p">We don't execute briefs. We co-create. Bring a vision — we bring the build capacity.</p>
+            </div>
+          </div>
+          <div class="manifesto-card">
+            <div class="m-card-num">03</div>
+            <div class="m-card-content">
+              <h3 data-i18n="mf.c3.h">A factory</h3>
+              <p data-i18n="mf.c3.p">Productive, prolific, proud of the work. The output is visible. The process is the story.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FACTORY FLOOR -->
+<section id="factory">
+  <div class="container">
+    <div class="factory-header">
+      <span class="label" data-i18n="ff.label">Factory Floor</span>
+      <h2 class="factory-h2" data-i18n="ff.h2">The portfolio IS the proof.</h2>
+      <p class="factory-sub" data-i18n="ff.sub">Everything BLAST builds is visible. Real projects, real URLs, real systems. This is what we mean when we say we build.</p>
+    </div>
+    <div class="factory-grid">
+      <div class="factory-item" onclick="window.open('https://thothanalytics.ai','_blank')">
+        <div class="fi-status live"><div class="fi-status-dot"></div><span data-i18n="ff.live">Live</span></div>
+        <div class="fi-name">THOTH Analytics</div>
+        <div class="fi-desc" data-i18n="ff.thoth">Real estate intelligence platform for Portugal. AI-powered market analysis, data aggregation, investment signals.</div>
+        <div class="fi-url">thothanalytics.ai</div>
+      </div>
+      <div class="factory-item" onclick="window.open('https://terracotta.media','_blank')">
+        <div class="fi-status live"><div class="fi-status-dot"></div><span data-i18n="ff.live">Live</span></div>
+        <div class="fi-name">TERRACOTTA</div>
+        <div class="fi-desc" data-i18n="ff.terracotta">Full-stack ceramics marketplace. AI product discovery, seller intelligence, community platform.</div>
+        <div class="fi-url">terracotta.media</div>
+      </div>
+      <div class="factory-item">
+        <div class="fi-status built"><div class="fi-status-dot"></div><span data-i18n="ff.built">Built</span></div>
+        <div class="fi-name">PABlo</div>
+        <div class="fi-desc" data-i18n="ff.pablo">AI-powered personal assistant platform. Multi-modal interface, task automation, context-aware intelligence layer.</div>
+        <div class="fi-url" data-i18n="ff.internal">Internal System</div>
+      </div>
+      <div class="factory-item">
+        <div class="fi-status built"><div class="fi-status-dot"></div><span data-i18n="ff.built">Built</span></div>
+        <div class="fi-name">AI Mission Control</div>
+        <div class="fi-desc" data-i18n="ff.missioncontrol">Centralized AI operations dashboard. Agent orchestration, live KPI tracking, multi-project command center.</div>
+        <div class="fi-url" data-i18n="ff.internal">Internal System</div>
+      </div>
+      <div class="factory-item">
+        <div class="fi-status built"><div class="fi-status-dot"></div><span data-i18n="ff.built">Built</span></div>
+        <div class="fi-name">ORACLE</div>
+        <div class="fi-desc" data-i18n="ff.oracle">Multi-modal AI decision engine. Connects disparate data sources into unified strategic intelligence.</div>
+        <div class="fi-url" data-i18n="ff.internal">Internal System</div>
+      </div>
+      <div class="factory-item">
+        <div class="fi-status built"><div class="fi-status-dot"></div><span data-i18n="ff.built">Built</span></div>
+        <div class="fi-name">Mission Control</div>
+        <div class="fi-desc" data-i18n="ff.mission">Autonomous AI operations dashboard. Agent management, KPI tracking, real-time decision layer.</div>
+        <div class="fi-url" data-i18n="ff.internal">Internal System</div>
+      </div>
+    </div>
+    <div class="factory-more">
+      <p data-i18n="ff.more">These are 6 of <strong>24+ systems</strong> built in 6 months. Every project is a proof of concept. Every build teaches us something new.</p>
+    </div>
+  </div>
+</section>
+
+<!-- BUILD (HOW WE WORK) -->
+<section id="build">
+  <div class="container">
+    <div class="build-header">
+      <span class="label" data-i18n="bld.label">How We Work</span>
+      <h2 class="build-h2" data-i18n="bld.h2">Two ways to enter the factory.</h2>
+      <p class="build-sub" data-i18n="bld.sub">Commission a build, or partner with us long-term. Both start with a conversation.</p>
+    </div>
+    <div class="build-grid">
+      <div class="build-card featured">
+        <div class="build-badge" data-i18n="bld.badge">Most Popular</div>
+        <div class="build-num" data-i18n="bld.c1.num">01 — Commission</div>
+        <div class="build-name" data-i18n="bld.c1.name">Build My Project</div>
+        <div class="build-tagline" data-i18n="bld.c1.tag">You have an idea, a problem, a vision. We build it. Full-stack, AI-powered, fast. From concept to deployed product — fixed deliverable, fixed price.</div>
+        <div class="build-what" data-i18n="bld.what">What we build</div>
+        <ul class="build-list">
+          <li data-i18n="bld.c1.f1">Web applications (full-stack)</li>
+          <li data-i18n="bld.c1.f2">AI-powered platforms and tools</li>
+          <li data-i18n="bld.c1.f3">Data intelligence systems</li>
+          <li data-i18n="bld.c1.f4">Brands and digital identities</li>
+          <li data-i18n="bld.c1.f5">Automation systems and agents</li>
+          <li data-i18n="bld.c1.f6">Marketplaces and communities</li>
+          <li data-i18n="bld.c1.f7">Custom business tools</li>
+        </ul>
+        <button class="build-cta build-cta-primary" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})" data-i18n="bld.c1.cta">Start a Project →</button>
+      </div>
+      <div class="build-card">
+        <div class="build-num" data-i18n="bld.c2.num">02 — Partnership</div>
+        <div class="build-name" data-i18n="bld.c2.name">Factory Access</div>
+        <div class="build-tagline" data-i18n="bld.c2.tag">For companies that need ongoing build capacity. We become your AI development arm — monthly builds, iterations, new systems. The factory works for you continuously.</div>
+        <div class="build-what" data-i18n="bld.what2">What you get</div>
+        <ul class="build-list">
+          <li data-i18n="bld.c2.f1">Dedicated AI build capacity</li>
+          <li data-i18n="bld.c2.f2">Monthly new systems shipped</li>
+          <li data-i18n="bld.c2.f3">Ongoing iteration and optimization</li>
+          <li data-i18n="bld.c2.f4">Strategic direction included</li>
+          <li data-i18n="bld.c2.f5">Priority access and response</li>
+          <li data-i18n="bld.c2.f6">Full-stack execution, no hand-holding</li>
+        </ul>
+        <button class="build-cta build-cta-ghost" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})" data-i18n="bld.c2.cta">Discuss Partnership →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO -->
+<section id="demo">
+  <div class="demo-inner">
+    <div class="demo-header">
+      <span class="label" data-i18n="demo.label">Live Demo</span>
+      <h2 class="demo-h2" data-i18n="demo.h2">What could we build for you?</h2>
+      <p class="demo-sub" data-i18n="demo.sub">Answer 4 questions. The factory AI maps your biggest build opportunity in 30 seconds.<br/>This is what we do — right now, free.</p>
+    </div>
+    <div class="demo-box">
+      <div class="demo-bar">
+        <div class="demo-dot" style="background:#e74c3c"></div>
+        <div class="demo-dot" style="background:#f39c12"></div>
+        <div class="demo-dot" style="background:#2ecc71"></div>
+        <div class="demo-bar-title" data-i18n="demo.bar">BLAST FACTORY AI — LIVE</div>
+      </div>
+      <div class="demo-body">
+        <div class="demo-progress">
+          <div class="demo-pip" id="p0"></div>
+          <div class="demo-pip" id="p1"></div>
+          <div class="demo-pip" id="p2"></div>
+          <div class="demo-pip" id="p3"></div>
+        </div>
+        <div class="demo-step active" id="s0">
+          <div class="demo-q" data-i18n="dq0">What best describes your situation?</div>
+          <div class="demo-q-sub" data-i18n="dq0s">This helps us point you to the most relevant factory output.</div>
+          <div class="demo-opts">
+            <button class="demo-opt" data-s="0" data-v="idea" data-i18n="dq0.idea">💡 I have an idea I want to build into a real product</button>
+            <button class="demo-opt" data-s="0" data-v="problem" data-i18n="dq0.problem">🔧 I have a business problem that needs a custom solution</button>
+            <button class="demo-opt" data-s="0" data-v="scale" data-i18n="dq0.scale">🚀 I have something working and need to scale it with AI</button>
+            <button class="demo-opt" data-s="0" data-v="explore" data-i18n="dq0.explore">🔭 I want to explore what AI could do for my business</button>
+          </div>
+          <div class="demo-nav"><button class="demo-next" id="n0" disabled onclick="ns(1)" data-i18n="demo.cont">Continue →</button></div>
+        </div>
+        <div class="demo-step" id="s1">
+          <div class="demo-q" data-i18n="dq1">What's your sector?</div>
+          <div class="demo-q-sub" data-i18n="dq1s">The factory builds across all industries — this sharpens the output.</div>
+          <div class="demo-opts">
+            <button class="demo-opt" data-s="1" data-v="tech" data-i18n="dq1.tech">⚡ Tech / SaaS / Digital Product</button>
+            <button class="demo-opt" data-s="1" data-v="realestate" data-i18n="dq1.re">🏢 Real Estate / Property</button>
+            <button class="demo-opt" data-s="1" data-v="commerce" data-i18n="dq1.com">🛍️ Commerce / Marketplace / Retail</button>
+            <button class="demo-opt" data-s="1" data-v="creative" data-i18n="dq1.cr">🎨 Creative / Media / Culture</button>
+            <button class="demo-opt" data-s="1" data-v="services" data-i18n="dq1.sv">🤝 Professional Services / B2B</button>
+            <button class="demo-opt" data-s="1" data-v="other" data-i18n="dq1.ot">🌍 Other</button>
+          </div>
+          <div class="demo-nav"><button class="demo-next" id="n1" disabled onclick="ns(2)" data-i18n="demo.cont">Continue →</button></div>
+        </div>
+        <div class="demo-step" id="s2">
+          <div class="demo-q" data-i18n="dq2">What's the biggest thing holding you back?</div>
+          <div class="demo-q-sub" data-i18n="dq2s">Be direct — this is where the factory focuses.</div>
+          <div class="demo-opts">
+            <button class="demo-opt" data-s="2" data-v="build" data-i18n="dq2.build">No build team — I can't execute the idea</button>
+            <button class="demo-opt" data-s="2" data-v="speed" data-i18n="dq2.speed">Too slow — competitors are moving faster</button>
+            <button class="demo-opt" data-s="2" data-v="cost" data-i18n="dq2.cost">Too expensive — traditional dev costs too much</button>
+            <button class="demo-opt" data-s="2" data-v="clarity" data-i18n="dq2.clarity">Lack of clarity — I know the problem, not the solution</button>
+          </div>
+          <div class="demo-nav"><button class="demo-next" id="n2" disabled onclick="ns(3)" data-i18n="demo.cont">Continue →</button></div>
+        </div>
+        <div class="demo-step" id="s3">
+          <div class="demo-q" data-i18n="dq3">What does success look like in 90 days?</div>
+          <div class="demo-q-sub" data-i18n="dq3s">This defines what we build toward.</div>
+          <div class="demo-opts">
+            <button class="demo-opt" data-s="3" data-v="launched" data-i18n="dq3.launched">A live product I can show to users / investors</button>
+            <button class="demo-opt" data-s="3" data-v="revenue" data-i18n="dq3.revenue">First revenue from the new system</button>
+            <button class="demo-opt" data-s="3" data-v="automated" data-i18n="dq3.automated">Key processes automated — my team is freed up</button>
+            <button class="demo-opt" data-s="3" data-v="competitive" data-i18n="dq3.competitive">A clear AI advantage over my competitors</button>
+          </div>
+          <div class="demo-nav"><button class="demo-next" id="n3" disabled onclick="sr()" data-i18n="demo.gen">Show Me What's Possible →</button></div>
+        </div>
+        <div class="demo-step" id="s-res">
+          <div class="res-header">
+            <h3 data-i18n="demo.res.h">What BLAST would build for you.</h3>
+            <p id="res-sub"></p>
+          </div>
+          <div id="res-opps"></div>
+          <div class="res-cta">
+            <p data-i18n="demo.res.cta">This is a starting point. The real conversation goes deeper — into your specific context, timeline, and vision. That's where the interesting builds happen.</p>
+            <a href="#contact" class="btn-primary" data-i18n="demo.res.btn">Start the Conversation →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="container">
+    <div class="contact-grid">
+      <div class="contact-left">
+        <span class="label" data-i18n="ct.label">Start a Project</span>
+        <h2 data-i18n="ct.h2">Bring us your idea.<br/>We'll build it.</h2>
+        <p data-i18n="ct.body">No pitch decks. No lengthy briefs. Tell us what you're trying to build — we'll tell you if we can do it, how fast, and what it takes. Every message goes directly to John.</p>
+        <div class="contact-meta">
+          <div class="contact-meta-item" data-i18n="ct.m1">Response within 24 hours</div>
+          <div class="contact-meta-item" data-i18n="ct.m2">Prototype in 48 hours for the right project</div>
+          <div class="contact-meta-item" data-i18n="ct.m3">No idea too early, no project too complex</div>
+          <div class="contact-meta-item" data-i18n="ct.m4">We work globally from Nazaré, Portugal</div>
+        </div>
+      </div>
+      <div>
+        <form id="ctForm" onsubmit="subForm(event)">
+          <div class="form-group"><label class="form-label" data-i18n="fm.name">Your Name *</label><input class="form-input" type="text" required data-i18n-ph="fm.name.ph" placeholder="Your name"/></div>
+          <div class="form-group"><label class="form-label" data-i18n="fm.email">Email *</label><input class="form-input" type="email" required placeholder="you@company.com"/></div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="fm.type">Project Type</label>
+            <select class="form-select">
+              <option value="" data-i18n="fm.type.def">What are you building?</option>
+              <option data-i18n="fm.type.app">Web App / Platform</option>
+              <option data-i18n="fm.type.ai">AI System / Agent</option>
+              <option data-i18n="fm.type.data">Data / Intelligence Tool</option>
+              <option data-i18n="fm.type.brand">Brand / Digital Identity</option>
+              <option data-i18n="fm.type.auto">Automation System</option>
+              <option data-i18n="fm.type.other">Something Else</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label" data-i18n="fm.idea">Tell us about it *</label><textarea class="form-textarea" required data-i18n-ph="fm.idea.ph" placeholder="What's the idea? What problem does it solve? What's your timeline?"></textarea></div>
+          <button type="submit" class="form-submit" data-i18n="fm.submit">Send to the Factory →</button>
+          <p class="form-note" data-i18n="fm.note">Every message is read personally by John, Founder of BLAST.</p>
+        </form>
+        <div class="form-success" id="ct-success">
+          <h3 data-i18n="fm.ok.h">Message received.</h3>
+          <p data-i18n="fm.ok.p">John will read this personally and reply within 24 hours.<br/>The factory is already thinking about your project.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-left">
+    <div class="footer-logo">BL<span>A</span>ST</div>
+    <div class="footer-tag" data-i18n="ft.tag">The Creative AI Factory · Nazaré, Portugal</div>
+  </div>
+  <div class="footer-copy" data-i18n="ft.copy">© 2026 BLAST. All rights reserved.</div>
+</footer>
+
+<script>
+// ── i18n ──
+const T = {
+  en: {
+    'nav.cta':'Start a Project',
+    'hero.tag':'Nazaré, Portugal · Active',
+    'hero.h1a':'The Creative',
+    'hero.h1b':'AI Factory.',
+    'hero.sub':'One founder. A specialized team of AI agents.<br/><strong>We build real things.</strong> Apps, platforms, systems, brands, experiences.<br/>Any idea. Any scale. Fast.',
+    'hero.cta1':'Start a Project',
+    'hero.cta2':'How We Work →',
+    'hero.s1':'Systems Built',
+    'hero.s2':'Idea to Prototype',
+    'hero.s3':'Build Capacity',
+    'hero.s4':'Human Vision',
+    'mf.label':'The Factory',
+    'mf.h2':'Built like Warhol.<br/>Powered by <em>AI.</em>',
+    'mf.p1':"In the 1960s, Andy Warhol created the Factory in New York. A space where art, film, music, and culture were produced constantly, visibly, prolifically. <strong>The Factory was the brand.</strong> Not what it sold — what it made.",
+    'mf.p2':'BLAST is that. In 2026. With AI at the core. One human with a clear vision — and a factory floor of specialized AI agents that can build anything, at any scale, faster than any traditional team.',
+    'mf.p3':'<strong>Warhol had humans pretending to be machines. We have machines amplifying a human.</strong> That inversion defines this decade. 24+ systems in 6 months. The factory is open.',
+    'mf.quote':'"Don\'t think about making art, just get it done. Let everyone else decide if it\'s good or bad. While they are deciding, make even more art."',
+    'mf.c1.h':'Not a consultancy','mf.c1.p':"We don't write reports. We don't run discovery phases. We build things and ship them.",
+    'mf.c2.h':'Not an agency','mf.c2.p':"We don't execute briefs. We co-create. Bring a vision — we bring the build capacity.",
+    'mf.c3.h':'A factory','mf.c3.p':'Productive, prolific, proud of the work. The output is visible. The process is the story.',
+    'ff.label':'Factory Floor',
+    'ff.h2':'The portfolio IS the proof.',
+    'ff.sub':"Everything BLAST builds is visible. Real projects, real URLs, real systems. This is what we mean when we say we build.",
+    'ff.live':'Live','ff.built':'Built','ff.internal':'Internal System',
+    'ff.thoth':'Real estate intelligence for Portugal. AI market analysis, data aggregation, investment signals.',
+    'ff.terracotta':'Full-stack ceramics marketplace. AI product discovery, seller intelligence, community.',
+    'ff.nazare':'AI-assisted coworking platform for Nazaré. Member matching, space optimization.',
+    'ff.pablo':'AI-powered personal assistant platform. Multi-modal interface, task automation, context-aware intelligence layer.',
+    'ff.missioncontrol':'Centralized AI operations dashboard. Agent orchestration, live KPI tracking, multi-project command center.',
+    'ff.oracle':'Multi-modal AI decision engine. Unified strategic intelligence layer.',
+    'ff.mission':'Autonomous AI operations. Agent management, KPI tracking, decision layer.',
+    'ff.more':'These are 6 of <strong>24+ systems</strong> built in 6 months. Every project is a proof of concept.',
+    'bld.label':'How We Work',
+    'bld.h2':'Two ways to enter the factory.',
+    'bld.sub':'Commission a build, or partner long-term. Both start with a conversation.',
+    'bld.badge':'Most Popular',
+    'bld.c1.num':'01 — Commission','bld.c1.name':'Build My Project',
+    'bld.c1.tag':'You have an idea, a problem, a vision. We build it. Full-stack, AI-powered, fast. Fixed deliverable, fixed price.',
+    'bld.what':'What we build','bld.what2':'What you get',
+    'bld.c1.f1':'Web applications (full-stack)','bld.c1.f2':'AI-powered platforms and tools',
+    'bld.c1.f3':'Data intelligence systems','bld.c1.f4':'Brands and digital identities',
+    'bld.c1.f5':'Automation systems and agents','bld.c1.f6':'Marketplaces and communities','bld.c1.f7':'Custom business tools',
+    'bld.c1.cta':'Start a Project →',
+    'bld.c2.num':'02 — Partnership','bld.c2.name':'Factory Access',
+    'bld.c2.tag':'For companies that need ongoing build capacity. We become your AI development arm — monthly builds, iterations, new systems.',
+    'bld.c2.f1':'Dedicated AI build capacity','bld.c2.f2':'Monthly new systems shipped',
+    'bld.c2.f3':'Ongoing iteration and optimization','bld.c2.f4':'Strategic direction included',
+    'bld.c2.f5':'Priority access and response','bld.c2.f6':'Full-stack execution',
+    'bld.c2.cta':'Discuss Partnership →',
+    'demo.label':'Live Demo','demo.h2':'What could we build for you?',
+    'demo.sub':"Answer 4 questions. The factory AI maps your biggest build opportunity in 30 seconds.<br/>This is what we do — right now, free.",
+    'demo.bar':'BLAST FACTORY AI — LIVE',
+    'dq0':"What best describes your situation?",'dq0s':'This helps us point you to the most relevant factory output.',
+    'dq0.idea':'💡 I have an idea I want to build into a real product',
+    'dq0.problem':'🔧 I have a business problem that needs a custom solution',
+    'dq0.scale':'🚀 I have something working and need to scale it with AI',
+    'dq0.explore':'🔭 I want to explore what AI could do for my business',
+    'dq1':"What's your sector?",'dq1s':'The factory builds across all industries — this sharpens the output.',
+    'dq1.tech':'⚡ Tech / SaaS / Digital Product','dq1.re':'🏢 Real Estate / Property',
+    'dq1.com':'🛍️ Commerce / Marketplace / Retail','dq1.cr':'🎨 Creative / Media / Culture',
+    'dq1.sv':'🤝 Professional Services / B2B','dq1.ot':'🌍 Other',
+    'dq2':"What's the biggest thing holding you back?",'dq2s':'Be direct — this is where the factory focuses.',
+    'dq2.build':"No build team — I can't execute the idea",'dq2.speed':'Too slow — competitors are moving faster',
+    'dq2.cost':'Too expensive — traditional dev costs too much','dq2.clarity':"Lack of clarity — I know the problem, not the solution",
+    'dq3':"What does success look like in 90 days?",'dq3s':'This defines what we build toward.',
+    'dq3.launched':'A live product I can show to users / investors',
+    'dq3.revenue':'First revenue from the new system',
+    'dq3.automated':'Key processes automated — my team is freed up',
+    'dq3.competitive':'A clear AI advantage over my competitors',
+    'demo.cont':'Continue →','demo.gen':'Show Me What\'s Possible →',
+    'demo.res.h':'What BLAST would build for you.',
+    'demo.res.cta':"This is a starting point. The real conversation goes deeper — into your specific context, timeline, and vision. That's where the interesting builds happen.",
+    'demo.res.btn':'Start the Conversation →',
+    'ct.label':'Start a Project',
+    'ct.h2':"Bring us your idea.<br/>We'll build it.",
+    'ct.body':"No pitch decks. No lengthy briefs. Tell us what you're trying to build — we'll tell you if we can do it, how fast, and what it takes. Every message goes directly to John.",
+    'ct.m1':'Response within 24 hours','ct.m2':'Prototype in 48 hours for the right project',
+    'ct.m3':'No idea too early, no project too complex','ct.m4':'We work globally from Nazaré, Portugal',
+    'fm.name':'Your Name *','fm.name.ph':'Your name','fm.email':'Email *',
+    'fm.type':'Project Type','fm.type.def':'What are you building?',
+    'fm.type.app':'Web App / Platform','fm.type.ai':'AI System / Agent',
+    'fm.type.data':'Data / Intelligence Tool','fm.type.brand':'Brand / Digital Identity',
+    'fm.type.auto':'Automation System','fm.type.other':'Something Else',
+    'fm.idea':'Tell us about it *','fm.idea.ph':"What's the idea? What problem does it solve? What's your timeline?",
+    'fm.submit':'Send to the Factory →',
+    'fm.note':'Every message is read personally by John, Founder of BLAST.',
+    'fm.ok.h':'Message received.','fm.ok.p':'John will read this personally and reply within 24 hours.<br/>The factory is already thinking about your project.',
+    'ft.tag':'The Creative AI Factory · Nazaré, Portugal','ft.copy':'© 2026 BLAST. All rights reserved.',
+    'res.sub':'{sit} in {sec} — here\'s what the factory would build.',
+    'sit':{'idea':'An idea to build','problem':'A problem to solve','scale':'A product to scale','explore':'An exploration'},
+    'sec':{'tech':'Tech','realestate':'Real Estate','commerce':'Commerce','creative':'Creative','services':'Professional Services','other':'Your Industry'},
+  },
+  pt: {
+    'nav.cta':'Iniciar Projecto',
+    'hero.tag':'Nazaré, Portugal · Activo',
+    'hero.h1a':'A Fábrica Criativa',
+    'hero.h1b':'de IA.',
+    'hero.sub':'Um fundador. Uma equipa especializada de agentes de IA.<br/><strong>Construímos coisas reais.</strong> Apps, plataformas, sistemas, marcas, experiências.<br/>Qualquer ideia. Qualquer escala. Rápido.',
+    'hero.cta1':'Iniciar Projecto',
+    'hero.cta2':'Como Trabalhamos →',
+    'hero.s1':'Sistemas Construídos',
+    'hero.s2':'Ideia a Protótipo',
+    'hero.s3':'Capacidade de Construção',
+    'hero.s4':'Visão Humana',
+    'mf.label':'A Fábrica',
+    'mf.h2':'Construída como Warhol.<br/>Alimentada por <em>IA.</em>',
+    'mf.p1':'Na década de 1960, Andy Warhol criou a Factory em Nova Iorque. Um espaço onde arte, cinema, música e cultura eram produzidos constantemente, visivelmente, prolificamente. <strong>A Fábrica era a marca.</strong> Não o que vendia — o que fazia.',
+    'mf.p2':'A BLAST é isso. Em 2026. Com IA no centro. Um humano com uma visão clara — e uma fábrica de agentes de IA especializados que podem construir qualquer coisa, a qualquer escala, mais rápido do que qualquer equipa tradicional.',
+    'mf.p3':'<strong>Warhol tinha humanos a fingir ser máquinas. Nós temos máquinas a amplificar um humano.</strong> Esta inversão define esta década.',
+    'mf.quote':'"Não penses em fazer arte, simplesmente faz. Deixa todos os outros decidir se é bom ou mau. Enquanto decidem, faz ainda mais arte."',
+    'mf.c1.h':'Não uma consultora','mf.c1.p':'Não escrevemos relatórios. Não fazemos fases de descoberta. Construímos coisas e lançamo-las.',
+    'mf.c2.h':'Não uma agência','mf.c2.p':'Não executamos briefings. Co-criamos. Traga uma visão — nós trazemos a capacidade de construção.',
+    'mf.c3.h':'Uma fábrica','mf.c3.p':'Produtiva, prolífica, orgulhosa do trabalho. O resultado é visível. O processo é a história.',
+    'ff.label':'Chão de Fábrica',
+    'ff.h2':'O portfólio É a prova.',
+    'ff.sub':'Tudo o que a BLAST constrói é visível. Projectos reais, URLs reais, sistemas reais. É isto que queremos dizer quando dizemos que construímos.',
+    'ff.live':'Activo','ff.built':'Construído','ff.internal':'Sistema Interno',
+    'ff.thoth':'Inteligência imobiliária para Portugal. Análise de mercado com IA, agregação de dados, sinais de investimento.',
+    'ff.terracotta':'Marketplace de cerâmica full-stack. Descoberta de produtos com IA, inteligência de vendedores.',
+    'ff.nazare':'Plataforma de coworking com IA para Nazaré. Correspondência de membros, optimização de espaço.',
+    'ff.pablo':'Plataforma de assistente pessoal com IA. Interface multimodal, automação de tarefas, camada de inteligência contextual.',
+    'ff.missioncontrol':'Dashboard centralizado de operações de IA. Orquestração de agentes, KPIs em tempo real, centro de comando multi-projecto.',
+    'ff.oracle':'Motor de decisão multimodal com IA. Camada unificada de inteligência estratégica.',
+    'ff.mission':'Operações autónomas com IA. Gestão de agentes, KPIs, camada de decisão.',
+    'ff.more':'Estes são 6 de <strong>mais de 24 sistemas</strong> construídos em 6 meses. Cada projecto é uma prova de conceito.',
+    'bld.label':'Como Trabalhamos',
+    'bld.h2':'Duas formas de entrar na fábrica.',
+    'bld.sub':'Comissione uma construção ou faça parceria a longo prazo. Ambos começam com uma conversa.',
+    'bld.badge':'Mais Popular',
+    'bld.c1.num':'01 — Comissão','bld.c1.name':'Construa o Meu Projecto',
+    'bld.c1.tag':'Tem uma ideia, um problema, uma visão. Nós construímos. Full-stack, alimentado por IA, rápido. Entregável fixo, preço fixo.',
+    'bld.what':'O que construímos','bld.what2':'O que recebe',
+    'bld.c1.f1':'Aplicações web (full-stack)','bld.c1.f2':'Plataformas e ferramentas com IA',
+    'bld.c1.f3':'Sistemas de inteligência de dados','bld.c1.f4':'Marcas e identidades digitais',
+    'bld.c1.f5':'Sistemas de automação e agentes','bld.c1.f6':'Marketplaces e comunidades','bld.c1.f7':'Ferramentas de negócio personalizadas',
+    'bld.c1.cta':'Iniciar Projecto →',
+    'bld.c2.num':'02 — Parceria','bld.c2.name':'Acesso à Fábrica',
+    'bld.c2.tag':'Para empresas que precisam de capacidade de construção contínua. Tornamo-nos o seu departamento de desenvolvimento de IA — construções mensais, iterações, novos sistemas.',
+    'bld.c2.f1':'Capacidade de construção de IA dedicada','bld.c2.f2':'Novos sistemas entregues mensalmente',
+    'bld.c2.f3':'Iteração e optimização contínuas','bld.c2.f4':'Direcção estratégica incluída',
+    'bld.c2.f5':'Acesso e resposta prioritários','bld.c2.f6':'Execução full-stack',
+    'bld.c2.cta':'Discutir Parceria →',
+    'demo.label':'Demo ao Vivo','demo.h2':'O que poderíamos construir para si?',
+    'demo.sub':'Responda a 4 perguntas. A IA da fábrica mapeia a sua maior oportunidade de construção em 30 segundos.<br/>É isto que fazemos — agora, gratuitamente.',
+    'demo.bar':'BLAST FACTORY IA — AO VIVO',
+    'dq0':'O que melhor descreve a sua situação?','dq0s':'Isto ajuda-nos a indicar o output de fábrica mais relevante.',
+    'dq0.idea':'💡 Tenho uma ideia que quero transformar num produto real',
+    'dq0.problem':'🔧 Tenho um problema de negócio que precisa de uma solução personalizada',
+    'dq0.scale':'🚀 Tenho algo a funcionar e preciso de o escalar com IA',
+    'dq0.explore':'🔭 Quero explorar o que a IA pode fazer pelo meu negócio',
+    'dq1':'Qual é o seu sector?','dq1s':'A fábrica constrói em todos os sectores — isto afina o resultado.',
+    'dq1.tech':'⚡ Tecnologia / SaaS / Produto Digital','dq1.re':'🏢 Imobiliário / Promoção Imobiliária',
+    'dq1.com':'🛍️ Comércio / Marketplace / Retalho','dq1.cr':'🎨 Criativo / Media / Cultura',
+    'dq1.sv':'🤝 Serviços Profissionais / B2B','dq1.ot':'🌍 Outro',
+    'dq2':'O que mais o impede de avançar?','dq2s':'Seja directo — é aqui que a fábrica se foca.',
+    'dq2.build':'Sem equipa de construção — não consigo executar a ideia','dq2.speed':'Demasiado lento — os concorrentes movem-se mais rápido',
+    'dq2.cost':'Demasiado caro — o desenvolvimento tradicional custa muito','dq2.clarity':'Falta de clareza — conheço o problema, não a solução',
+    'dq3':'Como é o sucesso daqui a 90 dias?','dq3s':'Isto define o que construímos.',
+    'dq3.launched':'Um produto activo que posso mostrar a utilizadores / investidores',
+    'dq3.revenue':'Primeira receita do novo sistema',
+    'dq3.automated':'Processos-chave automatizados — a minha equipa fica livre',
+    'dq3.competitive':'Uma clara vantagem de IA sobre os meus concorrentes',
+    'demo.cont':'Continuar →','demo.gen':'Mostre-me o que é Possível →',
+    'demo.res.h':'O que a BLAST construiria para si.',
+    'demo.res.cta':'Este é um ponto de partida. A conversa real vai mais fundo — no seu contexto específico, timeline e visão. É aí que acontecem as construções interessantes.',
+    'demo.res.btn':'Iniciar a Conversa →',
+    'ct.label':'Iniciar Projecto',
+    'ct.h2':"Traga-nos a sua ideia.<br/>Nós construímos.",
+    'ct.body':"Sem apresentações. Sem briefings longos. Diga-nos o que está a tentar construir — diremos se conseguimos, em quanto tempo e o que é necessário. Cada mensagem vai directamente para o John.",
+    'ct.m1':'Resposta em 24 horas','ct.m2':'Protótipo em 48 horas para o projecto certo',
+    'ct.m3':'Nenhuma ideia é cedo demais, nenhum projecto é complexo demais','ct.m4':'Trabalhamos globalmente a partir de Nazaré, Portugal',
+    'fm.name':'O Seu Nome *','fm.name.ph':'O seu nome','fm.email':'Email *',
+    'fm.type':'Tipo de Projecto','fm.type.def':'O que está a construir?',
+    'fm.type.app':'App Web / Plataforma','fm.type.ai':'Sistema de IA / Agente',
+    'fm.type.data':'Ferramenta de Dados / Inteligência','fm.type.brand':'Marca / Identidade Digital',
+    'fm.type.auto':'Sistema de Automação','fm.type.other':'Outra Coisa',
+    'fm.idea':'Fale-nos sobre isso *','fm.idea.ph':'Qual é a ideia? Que problema resolve? Qual é o seu prazo?',
+    'fm.submit':'Enviar para a Fábrica →',
+    'fm.note':'Cada mensagem é lida pessoalmente por John, Fundador da BLAST.',
+    'fm.ok.h':'Mensagem recebida.','fm.ok.p':'John irá ler pessoalmente e responder em 24 horas.<br/>A fábrica já está a pensar no seu projecto.',
+    'ft.tag':'A Fábrica Criativa de IA · Nazaré, Portugal','ft.copy':'© 2026 BLAST. Todos os direitos reservados.',
+    'res.sub':'{sit} em {sec} — isto é o que a fábrica construiria.',
+    'sit':{'idea':'Uma ideia para construir','problem':'Um problema para resolver','scale':'Um produto para escalar','explore':'Uma exploração'},
+    'sec':{'tech':'Tecnologia','realestate':'Imobiliário','commerce':'Comércio','creative':'Criativo','services':'Serviços Profissionais','other':'O Seu Sector'},
+  }
+};
+
+let lang = 'en';
+
+function setLang(l) {
+  lang = l;
+  document.getElementById('btn-en').classList.toggle('active', l==='en');
+  document.getElementById('btn-pt').classList.toggle('active', l==='pt');
+  document.documentElement.lang = l;
+  const t = T[l];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    if(t[k]!==undefined) el.innerHTML = t[k];
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const k = el.getAttribute('data-i18n-ph');
+    if(t[k]!==undefined) el.placeholder = t[k];
+  });
+  if(document.getElementById('s-res').classList.contains('active')) sr();
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  if((navigator.language||'').toLowerCase().startsWith('pt')) setLang('pt');
+});
+
+// Nav scroll
+window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('scrolled',scrollY>40));
+
+// Demo
+const ans = {};
+document.querySelectorAll('.demo-opt').forEach(b=>{
+  b.addEventListener('click',function(){
+    const s=this.dataset.s, v=this.dataset.v;
+    ans[s]=v;
+    document.querySelectorAll(`.demo-opt[data-s="${s}"]`).forEach(x=>x.classList.remove('sel'));
+    this.classList.add('sel');
+    const nb=document.getElementById('n'+s);
+    if(nb) nb.disabled=false;
+  });
+});
+
+function ns(n){
+  document.querySelector('.demo-step.active').classList.remove('active');
+  document.getElementById('s'+n).classList.add('active');
+  for(let i=0;i<n;i++) document.getElementById('p'+i).classList.add('done');
+}
+
+// Build opportunities matrix
+const opps = {
+  en: {
+    idea: {
+      tech: [
+        {t:'Full-Stack Web Application',b:"From your concept to a deployed, functional product. We architect, build, and ship. You get a live URL and working code — not a mockup.",r:'Timeline: 2–6 weeks depending on scope'},
+        {t:'AI-Powered Core Feature',b:'Whatever makes your product unique — we build it with AI at the center. Recommendation engine, smart search, predictive layer, automated logic.',r:'Differentiator: built-in from day one'},
+        {t:'MVP → Market-Ready Pipeline',b:'The fastest path from idea to users. We cut scope ruthlessly, ship the core, and iterate based on real feedback.',r:'First users: within 30 days'}
+      ],
+      realestate:[
+        {t:'Property Intelligence Platform',b:'AI-powered market analysis, automated valuation, deal flow detection. Turns raw data into investment decisions.',r:'Edge: data advantage over every competitor'},
+        {t:'Investor Portal & Dashboard',b:'Custom platform for your investor base. Portfolio tracking, opportunity alerts, automated reporting.',r:'Retention: investors stay closer'},
+        {t:'AI Listing & Lead Qualification',b:'Automated lead scoring, AI-generated property descriptions, smart matching between buyers and inventory.',r:'Conversion: 3x improvement typical'}
+      ],
+      default:[
+        {t:'Concept to Prototype in 48h',b:"We take your idea and return a working prototype in 48 hours. Not a wireframe — actual code, running in a browser.",r:'Speed: the factory moves fast'},
+        {t:'AI at the Core',b:'Whatever the product — we build AI into the foundation, not as a feature but as the operating engine.',r:'Competitive moat: built-in'},
+        {t:'Ship First, Perfect Later',b:'The factory bias is always toward shipping. A real product in users\' hands beats a perfect product in a spreadsheet.',r:'Momentum: nothing beats a live product'}
+      ]
+    },
+    problem:{
+      default:[
+        {t:'Custom Automation System',b:"We map the exact workflow that's costing you time or money, and build an AI system that handles it automatically.",r:'ROI: typically 10x the build cost in year one'},
+        {t:'Data Intelligence Layer',b:"Turn your existing data into decisions. We build the pipeline that connects your data sources to an AI that surfaces what matters.",r:'Decision speed: dramatically faster'},
+        {t:'AI Agent for Your Core Process',b:"Whatever your most critical, repetitive process is — we build an AI agent that handles it better than humans, at scale.",r:'Capacity: unlimited without hiring'}
+      ]
+    },
+    scale:{
+      default:[
+        {t:'AI Performance Layer',b:'Add intelligence to what you already have. Recommendation engine, personalization, predictive features — layered on top of your existing product.',r:'Engagement: typically +40–60%'},
+        {t:'Automation of Manual Processes',b:'Map every manual step in your current operation. Build AI systems for each. Your team works on what matters.',r:'Operational leverage: massive'},
+        {t:'Data Flywheel Architecture',b:'Build the system that gets smarter with every user action. The more it runs, the better it gets.',r:'Competitive moat: compounds over time'}
+      ]
+    },
+    explore:{
+      default:[
+        {t:'AI Opportunity Mapping',b:"We audit your current operation and map every place where AI creates leverage — revenue, efficiency, product, acquisition.",r:'Clarity: from fog to priority list'},
+        {t:'Proof of Concept Build',b:"Pick the highest-leverage AI opportunity we identify and we build a working proof of concept. You see it running before committing to a full build.",r:'Risk: near zero'},
+        {t:'Competitive Intelligence',b:"We map what your competitors are (and aren't) doing with AI. Find the gaps, build into them.",r:'Positioning: first-mover advantage'}
+      ]
+    }
+  },
+  pt:{
+    idea:{
+      tech:[
+        {t:'Aplicação Web Full-Stack',b:'Do seu conceito a um produto implementado e funcional. Arquitectamos, construímos e lançamos. Recebe um URL activo e código a funcionar.',r:'Prazo: 2–6 semanas consoante o âmbito'},
+        {t:'Funcionalidade Central com IA',b:'O que torna o seu produto único — construímos com IA no centro. Motor de recomendação, pesquisa inteligente, camada preditiva.',r:'Diferenciador: integrado desde o início'},
+        {t:'Pipeline MVP → Mercado',b:'O caminho mais rápido da ideia aos utilizadores. Cortamos o âmbito sem piedade, lançamos o essencial e iteramos com base em feedback real.',r:'Primeiros utilizadores: em 30 dias'}
+      ],
+      default:[
+        {t:'Conceito a Protótipo em 48h',b:'Pegamos na sua ideia e devolvemos um protótipo a funcionar em 48 horas. Não um wireframe — código real, a correr no browser.',r:'Velocidade: a fábrica move-se depressa'},
+        {t:'IA no Centro',b:'Seja qual for o produto — construímos IA na fundação, não como funcionalidade mas como motor de operação.',r:'Vantagem competitiva: integrada'},
+        {t:'Lança Primeiro, Perfectiona Depois',b:'O viés da fábrica é sempre lançar. Um produto real nas mãos dos utilizadores bate um produto perfeito numa folha de cálculo.',r:'Momentum: nada bate um produto activo'}
+      ]
+    },
+    problem:{
+      default:[
+        {t:'Sistema de Automação Personalizado',b:'Mapeamos o fluxo exacto que lhe custa tempo ou dinheiro e construímos um sistema de IA que o trata automaticamente.',r:'ROI: tipicamente 10x o custo de construção no primeiro ano'},
+        {t:'Camada de Inteligência de Dados',b:'Transforme os seus dados existentes em decisões. Construímos o pipeline que liga as suas fontes de dados a uma IA que revela o que importa.',r:'Velocidade de decisão: dramaticamente mais rápida'},
+        {t:'Agente de IA para o Seu Processo Central',b:'Seja qual for o seu processo mais crítico e repetitivo — construímos um agente de IA que o trata melhor do que humanos, à escala.',r:'Capacidade: ilimitada sem contratar'}
+      ]
+    },
+    scale:{
+      default:[
+        {t:'Camada de Performance com IA',b:'Adicione inteligência ao que já tem. Motor de recomendação, personalização, funcionalidades preditivas — por cima do seu produto existente.',r:'Engagement: tipicamente +40–60%'},
+        {t:'Automação de Processos Manuais',b:'Mapeie cada passo manual na sua operação actual. Construa sistemas de IA para cada um. A sua equipa trabalha no que importa.',r:'Alavancagem operacional: massiva'},
+        {t:'Arquitectura de Flywheel de Dados',b:'Construa o sistema que fica mais inteligente com cada acção do utilizador. Quanto mais corre, melhor fica.',r:'Vantagem competitiva: composta ao longo do tempo'}
+      ]
+    },
+    explore:{
+      default:[
+        {t:'Mapeamento de Oportunidades de IA',b:'Auditamos a sua operação actual e mapeamos cada sítio onde a IA cria alavancagem — receita, eficiência, produto, aquisição.',r:'Clareza: da névoa à lista de prioridades'},
+        {t:'Construção de Prova de Conceito',b:'Escolhemos a oportunidade de IA de maior alavancagem e construímos uma prova de conceito a funcionar. Vê-a antes de se comprometer com uma construção completa.',r:'Risco: próximo de zero'},
+        {t:'Inteligência Competitiva',b:'Mapeamos o que os seus concorrentes estão (e não estão) a fazer com IA. Encontramos as lacunas e construímos nelas.',r:'Posicionamento: vantagem de pioneiro'}
+      ]
+    }
+  }
+};
+
+function sr(){
+  document.querySelector('.demo-step.active').classList.remove('active');
+  document.querySelectorAll('.demo-pip').forEach(p=>p.classList.add('done'));
+  document.getElementById('s-res').classList.add('active');
+  const sit=ans['0']||'explore', sec=ans['1']||'other';
+  const t=T[lang], od=opps[lang];
+  const pool = od[sit]?.(od[sit][sec]||od[sit].default||od.explore.default) || od.explore.default;
+  const sitName=t.sit[sit]||sit, secName=t.sec[sec]||sec;
+  document.getElementById('res-sub').textContent=t['res.sub'].replace('{sit}',sitName).replace('{sec}',secName);
+  document.getElementById('res-opps').innerHTML=pool.slice(0,3).map((o,i)=>`
+    <div class="res-opp">
+      <div class="res-opp-title">${i+1}. ${o.t}</div>
+      <div class="res-opp-body">${o.b}</div>
+      <div class="res-opp-roi">${o.r}</div>
+    </div>`).join('');
+}
+
+// Form
+function subForm(e){
+  e.preventDefault();
+  document.getElementById('ctForm').style.display='none';
+  document.getElementById('ct-success').style.display='block';
+}
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const t=document.querySelector(a.getAttribute('href'));
+    if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth'})}
+  });
+});
+</script>
+</body>
+</html>
